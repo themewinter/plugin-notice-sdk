@@ -1,0 +1,9 @@
+{
+    "name": "arraytics/plugin-notice",
+    "autoload": {
+        "psr-4": {
+            "Arraytics\\PluginNotice\\": "src/"
+        }
+    },
+    "require": {}
+}

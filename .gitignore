@@ -1,0 +1,10 @@
+node_modules
+**/.DS_Store
+**.map
+/core/guten-block/node_modules
+prepros.config
+vendor
+build/
+package-lock.json
+.idea
+dist

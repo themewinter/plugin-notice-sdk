@@ -16,7 +16,7 @@ class Banner
      *
      * @var string
      */
-    protected string $version = '1.0.0'; // default fallback
+    protected $version = '1.0.0'; // default fallback
 
     /**
      * Singleton instance.
@@ -37,49 +37,49 @@ class Banner
      *
      * @var int
      */
-    protected int $last_check = 0;
+    protected $last_check = 0;
 
     /**
      * Time interval between API checks (default: 6 hours).
      *
      * @var int
      */
-    protected int $check_interval = 3600 * 6;
+    protected $check_interval = 3600 * 6;
 
     /**
      * Allowed screen IDs for banners.
      *
      * @var array
      */
-    protected array $plugin_screens = [];
+    protected $plugin_screens = [];
 
     /**
      * Text domain (used for caching keys).
      *
      * @var string
      */
-    protected string $text_domain;
+    protected $text_domain;
 
     /**
      * Comma-separated filter string (e.g., active plugin slugs).
      *
      * @var string|null
      */
-    protected ?string $filter_string = null;
+    protected $filter_string = null;
 
     /**
      * Parsed filter values as an array.
      *
      * @var array
      */
-    protected array $filter_array = [];
+    protected $filter_array = [];
 
     /**
      * Remote API base URL.
      *
      * @var string
      */
-    protected string $api_url;
+    protected $api_url;
 
     /**
      * Set the plugin version dynamically.
@@ -87,7 +87,7 @@ class Banner
      * @param string $version
      * @return $this
      */
-    public function set_version(string $version): self
+    public function set_version($version)
     {
         $this->version = $version;
         return $this;
@@ -98,7 +98,7 @@ class Banner
      *
      * @return string
      */
-    public function get_version(): string
+    public function get_version()
     {
         return $this->version;
     }
@@ -108,7 +108,7 @@ class Banner
      *
      * @return string
      */
-    public function get_script_location(): string
+    public function get_script_location()
     {
         return __FILE__;
     }
@@ -118,7 +118,7 @@ class Banner
      *
      * @return void
      */
-    public function call(): void
+    public function call()
     {
         add_action('admin_head', [$this, 'display_content']);
     }
@@ -128,7 +128,7 @@ class Banner
      *
      * @return void
      */
-    public function display_content(): void
+    public function display_content()
     {
         $this->get_data();
         if (!empty($this->data->error) || empty($this->data)) {
@@ -152,7 +152,7 @@ class Banner
                         ? $content->data->unique_key
                         : $content->id;
 
-                    $instance = Notice::instance( $this->text_domain, $banner_id)
+                    $instance = Notice::instance($this->text_domain, $banner_id)
                         ->set_dismiss('global', 3600 * 24 * 15);
 
                     if ($content->type === 'banner') {
@@ -175,7 +175,7 @@ class Banner
      * @param string $inline_css
      * @return void
      */
-    private function render_notice($content, $instance, string $inline_css): void
+    private function render_notice($content, $instance, $inline_css)
     {
         $instance->set_message($content->data->notice_body);
 
@@ -203,7 +203,7 @@ class Banner
      * @param string $inline_css
      * @return void
      */
-    private function render_banner($content, $instance, string $inline_css): void
+    private function render_banner($content, $instance, $inline_css)
     {
         $html = sprintf(
             '<a target="_blank"%s class="plugin-notice-href" href="%s"><img style="display: block;margin: 0 auto;" src="%s" /></a>',
@@ -220,7 +220,7 @@ class Banner
      *
      * @return void
      */
-    private function get_data(): void
+    private function get_data()
     {
         $this->data = get_option($this->text_domain . '__banner_data') ?: [];
         $this->last_check = get_option($this->text_domain . '__banner_last_check') ?: 0;
@@ -249,9 +249,9 @@ class Banner
      * @param array $list
      * @return bool
      */
-    private function in_blacklist($conf, array $list): bool
+    private function in_blacklist($conf, $list)
     {
-        $match = $conf->data->blacklist ?? '';
+        $match = isset($conf->data->blacklist) ? $conf->data->blacklist : '';
         if (empty($match)) {
             return false;
         }
@@ -267,7 +267,7 @@ class Banner
      * @param string $current_screen_id
      * @return bool
      */
-    public function is_correct_screen_to_show(string $expected_screen, string $current_screen_id): bool
+    public function is_correct_screen_to_show($expected_screen, $current_screen_id)
     {
         if (in_array($expected_screen, ['all_page', $current_screen_id], true)) {
             return true;
@@ -286,7 +286,7 @@ class Banner
      * @param bool $is_test
      * @return $this
      */
-    public function is_test(bool $is_test = false): self
+    public function is_test($is_test = false)
     {
         if ($is_test) {
             $this->check_interval = 1;
@@ -301,7 +301,7 @@ class Banner
      * @param string $text_domain
      * @return $this
      */
-    public function set_text_domain(string $text_domain): self
+    public function set_text_domain($text_domain)
     {
         $this->text_domain = $text_domain;
         return $this;
@@ -313,7 +313,7 @@ class Banner
      * @param string $filter_string
      * @return $this
      */
-    public function set_filter(string $filter_string): self
+    public function set_filter($filter_string)
     {
         $this->filter_string = $filter_string;
         $this->filter_array = array_map('trim', explode(',', $filter_string));
@@ -326,7 +326,7 @@ class Banner
      * @param string $url
      * @return $this
      */
-    public function set_api_url(string $url): self
+    public function set_api_url($url)
     {
         $this->api_url = $url;
         return $this;
@@ -338,7 +338,7 @@ class Banner
      * @param string|array $screen
      * @return $this
      */
-    public function set_plugin_screens($screen): self
+    public function set_plugin_screens($screen)
     {
         $this->plugin_screens = (array) $screen;
         return $this;
@@ -350,7 +350,7 @@ class Banner
      * @param string $text_domain
      * @return static
      */
-    public static function instance(string $text_domain = ''): self
+    public static function instance($text_domain = '')
     {
         self::$instance = new static();
         return self::$instance->set_text_domain($text_domain);

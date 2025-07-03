@@ -15,98 +15,98 @@ class Rating
      *
      * @var string
      */
-    private string $plugin_name;
+    private $plugin_name;
 
     /**
      * Priority for hooking into WordPress actions.
      *
      * @var int
      */
-    private int $priority = 10;
+    private $priority = 10;
 
     /**
      * Days after installation to show rating.
      *
      * @var int
      */
-    private int $days;
+    private $days;
 
     /**
      * URL for plugin rating page.
      *
      * @var string
      */
-    private string $rating_url;
+    private $rating_url;
 
     /**
      * URL for plugin support page.
      *
      * @var string
      */
-    private string $support_url;
+    private $support_url;
 
     /**
      * Plugin version, dynamically fetched.
      *
      * @var string
      */
-    private string $version;
+    private $version;
 
     /**
      * Whether conditions to show rating are met.
      *
      * @var bool
      */
-    private bool $condition_status = true;
+    private $condition_status = true;
 
     /**
      * Text domain for the plugin.
      *
      * @var string
      */
-    private string $text_domain;
+    private $text_domain;
 
     /**
      * URL of the plugin logo.
      *
      * @var string
      */
-    private string $plugin_logo;
+    private $plugin_logo;
 
     /**
      * Allowed admin screens to show rating.
      *
      * @var array
      */
-    private array $plugin_screens = [];
+    private $plugin_screens = [];
 
     /**
      * Whether duplicate rating notice is allowed.
      *
      * @var bool
      */
-    private bool $duplication = false;
+    private $duplication = false;
 
     /**
      * Flag to mark never-show triggered state.
      *
      * @var bool
      */
-    private bool $never_show_triggered = false;
+    private $never_show_triggered = false;
 
     /**
      * Interval (in days) to show rating again after "ask me later".
      *
      * @var int
      */
-    private int $rating_show_interval = 30;
+    private $rating_show_interval = 30;
 
     /**
      * API URL for fetching rating data.
      *
      * @var string
      */
-    private string $api_url;
+    private $api_url;
 
     /**
      * Get singleton instance.
@@ -115,7 +115,7 @@ class Rating
      * @param string|null $unique_id
      * @return self|false
      */
-    public static function instance(string $text_domain = null, string $unique_id = null)
+    public static function instance($text_domain = null, $unique_id = null)
     {
         if ($text_domain === null) {
             return false;
@@ -136,19 +136,13 @@ class Rating
      * @param string $unique_id
      * @return self
      */
-    public function config(string $text_domain, string $unique_id): self
+    public function config($text_domain, $unique_id)
     {
         $this->text_domain = $text_domain;
-        // You can use $unique_id if needed.
         return $this;
     }
 
-    /**
-     * Fetch and cache rating settings from API.
-     *
-     * @return void
-     */
-    public function update_settings(): void
+    public function update_settings()
     {
         $settings = get_transient($this->text_domain . '_rating_settings');
         if ($settings) {
@@ -163,114 +157,61 @@ class Rating
 
         $data = json_decode(wp_remote_retrieve_body($response), true);
 
-        $rating_settings = $data[$this->text_domain] ?? '';
+        $rating_settings = isset($data[$this->text_domain]) ? $data[$this->text_domain] : '';
 
         set_transient($this->text_domain . '_rating_settings', $rating_settings, 12 * HOUR_IN_SECONDS);
     }
 
-    /**
-     * Set the plugin name and rating URL.
-     *
-     * @param string $plugin_name
-     * @param string $plugin_url
-     * @return self
-     */
-    public function set_plugin(string $plugin_name, string $plugin_url): self
+    public function set_plugin($plugin_name, $plugin_url)
     {
         $this->plugin_name = $plugin_name;
         $this->rating_url = $plugin_url;
         return $this;
     }
 
-    /**
-     * Set API URL for fetching stories
-     */
-    public function set_api_url(string $url): self
+    public function set_api_url($url)
     {
         $this->api_url = rtrim($url, '/') . '/';
         return $this;
     }
 
-    /**
-     * Set the priority for action hooks.
-     *
-     * @param int $priority
-     * @return self
-     */
-    public function set_priority(int $priority): self
+    public function set_priority($priority)
     {
         $this->priority = $priority;
         return $this;
     }
 
-    /**
-     * Set the number of days after which rating appears.
-     *
-     * @param int $days
-     * @return self
-     */
-    public function set_first_appear_day(int $days = 7): self
+    public function set_first_appear_day($days = 7)
     {
         $this->days = $days;
         return $this;
     }
 
-    /**
-     * Set plugin rating URL.
-     *
-     * @param string $url
-     * @return self
-     */
-    public function set_rating_url(string $url): self
+    public function set_rating_url($url)
     {
         $this->rating_url = $url;
         return $this;
     }
 
-    /**
-     * Set plugin support URL.
-     *
-     * @param string $url
-     * @return self
-     */
-    public function set_support_url(string $url): self
+    public function set_support_url($url)
     {
         $this->support_url = $url;
         return $this;
     }
 
-    /**
-     * Set plugin logo URL.
-     *
-     * @param string $logo_url
-     * @return self
-     */
-    public function set_plugin_logo(string $logo_url): self
+    public function set_plugin_logo($logo_url)
     {
         $this->plugin_logo = $logo_url;
         return $this;
     }
 
-    /**
-     * Add allowed admin screen id to show rating notice.
-     *
-     * @param string $screen
-     * @return self
-     */
-    public function set_allowed_screens(string $screen): self
+    public function set_allowed_screens($screen)
     {
         $this->plugin_screens[] = $screen;
         return $this;
     }
 
-    /**
-     * Set condition to show rating notice.
-     * Accepts boolean or callable returning boolean.
-     *
-     * @param bool|callable $result
-     * @return self
-     */
-    public function set_condition($result): self
+    public function set_condition($result)
     {
         if (is_bool($result)) {
             $this->condition_status = $result;
@@ -282,46 +223,29 @@ class Rating
         return $this;
     }
 
-    /**
-     * Initialize ajax hooks.
-     */
-    public static function init(): void
+    public static function init()
     {
         add_action('wp_ajax_wpmet_rating_never_show_message', [__CLASS__, 'never_show_message']);
         add_action('wp_ajax_wpmet_rating_ask_me_later_message', [__CLASS__, 'ask_me_later_message']);
 
-        self::$instance->update_settings();
+        if (self::$instance instanceof self) {
+            self::$instance->update_settings();
+        }
     }
 
-    /**
-     * Check if current admin screen is allowed for rating notice.
-     *
-     * @param string $current_screen_id
-     * @return bool
-     */
-    protected function is_current_screen_allowed(string $current_screen_id): bool
+    protected function is_current_screen_allowed($current_screen_id)
     {
         $allowed = array_merge($this->plugin_screens, ['dashboard', 'plugins']);
         return in_array($current_screen_id, $allowed, true);
     }
 
-    /**
-     * Entry point to start rating notice logic.
-     *
-     * @return void
-     */
-    public function call(): void
+    public function call()
     {
         self::init();
         add_action('admin_head', [$this, 'fire'], $this->priority);
     }
 
-    /**
-     * Main logic to display rating notice when conditions are met.
-     *
-     * @return void
-     */
-    public function fire(): void
+    public function fire()
     {
         if (!current_user_can('update_plugins')) {
             return;
@@ -363,71 +287,38 @@ class Rating
         $this->display_message_box();
     }
 
-    /**
-     * Overrideable method to control if the rating notice should be fired.
-     *
-     * @return bool
-     */
-    protected function action_on_fire(): bool
+    protected function action_on_fire()
     {
         return true;
     }
 
-    /**
-     * Set installation date option.
-     */
-    public function set_installation_date(): void
+    public function set_installation_date()
     {
         add_option($this->text_domain . '_install_date', current_time('mysql'));
     }
 
-    /**
-     * Check if installation date option exists.
-     *
-     * @return bool
-     */
-    public function is_installation_date_exists(): bool
+    public function is_installation_date_exists()
     {
         return (bool) get_option($this->text_domain . '_install_date');
     }
 
-    /**
-     * Get installation date.
-     *
-     * @return string|false
-     */
     public function get_installation_date()
     {
         return get_option($this->text_domain . '_install_date');
     }
 
-    /**
-     * Set first action date and flag.
-     */
-    public function set_first_action_date(): void
+    public function set_first_action_date()
     {
         add_option($this->text_domain . '_first_action_Date', current_time('mysql'));
         add_option($this->text_domain . '_first_action', 'yes');
     }
 
-    /**
-     * Calculate number of days between two DateTime objects.
-     *
-     * @param \DateTime $from_date
-     * @param \DateTime $to_date
-     * @return int
-     */
-    public function get_days(\DateTime $from_date, \DateTime $to_date): int
+    public function get_days(\DateTime $from_date, \DateTime $to_date)
     {
         return (int) round(($to_date->format('U') - $from_date->format('U')) / (60 * 60 * 24));
     }
 
-    /**
-     * Get remaining days since installation.
-     *
-     * @return int
-     */
-    public function get_remaining_days(): int
+    public function get_remaining_days()
     {
         $install_date = $this->get_installation_date();
         if (!$install_date) {
@@ -438,10 +329,7 @@ class Rating
         return abs($this->get_days($datetime1, $datetime2));
     }
 
-    /**
-     * Never show rating message AJAX handler.
-     */
-    public static function never_show_message(): void
+    public static function never_show_message()
     {
         if (
             empty($_POST['nonce']) ||
@@ -451,17 +339,14 @@ class Rating
             return;
         }
 
-        $plugin_name = sanitize_key($_POST['plugin_name'] ?? '');
+        $plugin_name = sanitize_key(isset($_POST['plugin_name']) ? $_POST['plugin_name'] : '');
         if (!empty($plugin_name)) {
             add_option($plugin_name . '_never_show', 'yes');
         }
         wp_send_json_success();
     }
 
-    /**
-     * Ask me later AJAX handler.
-     */
-    public static function ask_me_later_message(): void
+    public static function ask_me_later_message()
     {
         if (
             empty($_POST['nonce']) ||
@@ -471,7 +356,7 @@ class Rating
             return;
         }
 
-        $plugin_name = sanitize_key($_POST['plugin_name'] ?? '');
+        $plugin_name = sanitize_key(isset($_POST['plugin_name']) ? $_POST['plugin_name'] : '');
         if (!empty($plugin_name)) {
             if (get_option($plugin_name . '_ask_me_later') === false) {
                 add_option($plugin_name . '_ask_me_later', 'yes');
@@ -482,12 +367,7 @@ class Rating
         wp_send_json_success();
     }
 
-    /**
-     * Display the rating message box.
-     *
-     * @return void
-     */
-    public function display_message_box(): void
+    public function display_message_box()
     {
         $settings = get_transient($this->text_domain . '_rating_settings');
         if ($settings !== 'yes') {
@@ -549,12 +429,7 @@ class Rating
         }
     }
 
-    /**
-     * Output the necessary JS for AJAX handling of rating buttons.
-     *
-     * @return void
-     */
-    public function scripts(): void
+    public function scripts()
     {
         $domain_js = esc_js($this->text_domain);
         $nonce_js = esc_js(wp_create_nonce('wpmet_rating'));

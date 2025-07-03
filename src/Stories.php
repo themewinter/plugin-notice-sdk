@@ -8,7 +8,7 @@ class Stories
      *
      * @var string
      */
-    protected string $version = '1.0.0'; // default fallback
+    protected $version = '1.0.0'; // default fallback
 
     /**
      * Holds the stories data object.
@@ -83,13 +83,18 @@ class Stories
 
     /**
      * Singleton instance
+     *
+     * @var self|null
      */
-    private static ?self $instance = null;
+    private static $instance = null;
 
     /**
      * Get singleton instance
+     *
+     * @param string $text_domain
+     * @return self
      */
-    public static function instance(string $text_domain = ''): self
+    public static function instance($text_domain = '')
     {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -106,7 +111,7 @@ class Stories
      * @param string $version
      * @return $this
      */
-    public function set_version(string $version): self
+    public function set_version($version)
     {
         $this->version = $version;
         return $this;
@@ -117,26 +122,32 @@ class Stories
      *
      * @return string
      */
-    public function get_version(): string
+    public function get_version()
     {
         return $this->version;
     }
 
     /**
      * Get current file path of this class
+     *
+     * @return string
      */
-    public function get_script_location(): string
+    public function get_script_location()
     {
         return __FILE__;
     }
 
     /**
      * Set plugin link for filter hooks
+     *
+     * @param string $link_title
+     * @param string $weblink
+     * @return $this
      */
-    public function set_plugin(string $link_title, string $weblink = ''): self
+    public function set_plugin($link_title, $weblink = '')
     {
         $plugin = [$link_title, $weblink];
-        add_filter('eventin/stories/plugin_links', function (array $plugin_links) use ($plugin) {
+        add_filter('eventin/stories/plugin_links', function ($plugin_links) use ($plugin) {
             $plugin_links[] = $plugin;
             return $plugin_links;
         });
@@ -146,15 +157,18 @@ class Stories
     /**
      * Register the dashboard widget callback
      */
-    public function call(): void
+    public function call()
     {
         add_action('wp_dashboard_setup', [$this, 'show_story_widget'], 111);
     }
 
     /**
      * Set the dashboard widget title
+     *
+     * @param string $title
+     * @return $this
      */
-    public function set_title(string $title): self
+    public function set_title($title)
     {
         $this->title = $title;
         return $this;
@@ -162,8 +176,11 @@ class Stories
 
     /**
      * Enable test mode (shorten interval)
+     *
+     * @param bool $is_test
+     * @return $this
      */
-    public function is_test(bool $is_test = false): self
+    public function is_test($is_test = false)
     {
         if ($is_test) {
             $this->check_interval = 1;
@@ -173,8 +190,11 @@ class Stories
 
     /**
      * Set the text domain for options and filtering
+     *
+     * @param string $text_domain
+     * @return $this
      */
-    public function set_text_domain(string $text_domain): self
+    public function set_text_domain($text_domain)
     {
         $this->text_domain = $text_domain;
         return $this;
@@ -182,8 +202,11 @@ class Stories
 
     /**
      * Set the filter string for blacklist/whitelist filtering
+     *
+     * @param string $filter_string
+     * @return $this
      */
-    public function set_filter(string $filter_string): self
+    public function set_filter($filter_string)
     {
         $this->filter_string = $filter_string;
         return $this;
@@ -191,8 +214,11 @@ class Stories
 
     /**
      * Set API URL for fetching stories
+     *
+     * @param string $url
+     * @return $this
      */
-    public function set_api_url(string $url): self
+    public function set_api_url($url)
     {
         $this->api_url = rtrim($url, '/') . '/';
         return $this;
@@ -200,8 +226,11 @@ class Stories
 
     /**
      * Add allowed plugin screens where the widget should appear
+     *
+     * @param string $screen
+     * @return $this
      */
-    public function set_plugin_screens(string $screen): self
+    public function set_plugin_screens($screen)
     {
         $this->plugin_screens[] = $screen;
         return $this;
@@ -210,10 +239,10 @@ class Stories
     /**
      * Show the dashboard widget with stories
      */
-    public function show_story_widget(): void
+    public function show_story_widget()
     {
         $this->get_stories();
-        
+
         if (empty($this->data) || !empty($this->data->error)) {
             return;
         }
@@ -245,7 +274,7 @@ class Stories
 
         // Move the widget to the top of the normal-high priority widgets
         global $wp_meta_boxes;
-        $dashboard = $wp_meta_boxes['dashboard']['normal']['high'] ?? [];
+        $dashboard = isset($wp_meta_boxes['dashboard']['normal']['high']) ? $wp_meta_boxes['dashboard']['normal']['high'] : [];
         if (isset($dashboard['wpmet-stories'])) {
             $wp_meta_boxes['dashboard']['normal']['high'] =
                 array_merge(['wpmet-stories' => $dashboard['wpmet-stories']], $dashboard);
@@ -255,16 +284,25 @@ class Stories
     /**
      * Render the stories widget output
      */
-    public function show(): void
+    public function show()
     {
-        usort($this->stories, fn($a, $b) => $a['priority'] <=> $b['priority']);
+        usort($this->stories, function ($a, $b) {
+            if ($a['priority'] === $b['priority']) {
+                return 0;
+            }
+            return ($a['priority'] < $b['priority']) ? -1 : 1;
+        });
         include_once 'views/utility-story-template.php';
     }
 
     /**
      * Check if current admin screen is allowed to show stories widget
+     *
+     * @param string $b_screen
+     * @param string $screen_id
+     * @return bool
      */
-    public function is_correct_screen_to_show(string $b_screen, string $screen_id): bool
+    public function is_correct_screen_to_show($b_screen, $screen_id)
     {
         if (in_array($b_screen, [$screen_id, 'all_page'], true)) {
             return true;
@@ -277,10 +315,14 @@ class Stories
 
     /**
      * Check if a given configuration is whitelisted for the provided list
+     *
+     * @param object $conf
+     * @param array $list
+     * @return bool
      */
-    private function in_whitelist(object $conf, array $list): bool
+    private function in_whitelist($conf, $list)
     {
-        $match = $conf->data->whitelist ?? '';
+        $match = isset($conf->data->whitelist) ? $conf->data->whitelist : '';
         if (empty($match)) {
             return true;
         }
@@ -290,10 +332,14 @@ class Stories
 
     /**
      * Check if a given configuration is blacklisted for the provided list
+     *
+     * @param object $conf
+     * @param array $list
+     * @return bool
      */
-    private function in_blacklist(object $conf, array $list): bool
+    private function in_blacklist($conf, $list)
     {
-        $match = $conf->data->blacklist ?? '';
+        $match = isset($conf->data->blacklist) ? $conf->data->blacklist : '';
         if (empty($match)) {
             return false;
         }
@@ -303,8 +349,10 @@ class Stories
 
     /**
      * Add a story to the internal collection after checks
+     *
+     * @param object $story
      */
-    private function set_stories(object $story): void
+    private function set_stories($story)
     {
         if (isset($this->stories[$story->id])) {
             return; // already added
@@ -337,15 +385,15 @@ class Stories
             'description' => $story->description,
             'type'        => $story->type,
             'priority'    => $story->priority,
-            'story_link'  => $story->data->story_link ?? '',
-            'story_image' => $story->data->story_image ?? '',
+            'story_link'  => isset($story->data->story_link) ? $story->data->story_link : '',
+            'story_image' => isset($story->data->story_image) ? $story->data->story_image : '',
         ];
     }
 
     /**
      * Fetch stories from API or cache and update local storage
      */
-    private function get_stories(): void
+    private function get_stories()
     {
         $this->data = get_option($this->text_domain . '__stories_data');
         $this->data = empty($this->data) ? [] : $this->data;

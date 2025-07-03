@@ -19,84 +19,84 @@ class PluginNotice
      *
      * @var string
      */
-    protected string $plugin_slug;
+    protected $plugin_slug;
 
     /**
      * Human-readable plugin name.
      *
      * @var string
      */
-    protected string $plugin_name;
+    protected $plugin_name;
 
     /**
      * Plugin website URL.
      *
      * @var string
      */
-    protected string $plugin_url;
+    protected $plugin_url;
 
     /**
      * Support page URL for the plugin.
      *
      * @var string
      */
-    protected string $support_url;
+    protected $support_url;
 
     /**
      * Review URL (typically on WordPress.org).
      *
      * @var string
      */
-    protected string $review_url;
+    protected $review_url;
 
     /**
      * Allowed admin screen(s) where the banner/notice can be shown.
      *
      * @var string
      */
-    protected string $allowed_screens;
+    protected $allowed_screens;
 
     /**
      * API endpoint for fetching stories.
      *
      * @var string
      */
-    protected string $stories_api_url;
+    protected $stories_api_url;
 
     /**
      * API endpoint for fetching banners.
      *
      * @var string
      */
-    protected string $banners_api_url;
+    protected $banners_api_url;
 
     /**
      * Array of plugin slugs used to build the active plugins filter string.
      *
      * @var array
      */
-    protected array $base_plugins;
+    protected $base_plugins;
 
     /**
      * Slug of the pro version plugin, if available.
      *
      * @var string|null
      */
-    protected ?string $pro_plugin_slug = null;
+    protected $pro_plugin_slug = null;
 
     /**
      * Class name to check if the pro plugin is active.
      *
      * @var string|null
      */
-    protected ?string $pro_class = null;
+    protected $pro_class = null;
 
     /**
      * Final computed filter string (comma-separated plugin slugs).
      *
      * @var string
      */
-    protected string $filter_string;
+    protected $filter_string;
     
     /**
      * Store api url
@@ -136,11 +136,11 @@ class PluginNotice
         $this->stories_api_url = $config['stories_api_url'];
         $this->banners_api_url = $config['banners_api_url'];
 
-        $this->base_plugins    = $config['base_plugins'] ?? [$this->plugin_slug];
-        $this->pro_plugin_slug = $config['pro_plugin_slug'] ?? null;
-        $this->pro_class       = $config['pro_class'] ?? null;
+        $this->base_plugins    = isset($config['base_plugins']) ? $config['base_plugins'] : [$this->plugin_slug];
+        $this->pro_plugin_slug = isset($config['pro_plugin_slug']) ? $config['pro_plugin_slug'] : null;
+        $this->pro_class       = isset($config['pro_class']) ? $config['pro_class'] : null;
 
-        $this->filter_string   = $config['filter_string'] ?? $this->generate_filter_string();
+        $this->filter_string   = isset($config['filter_string']) ? $config['filter_string'] : $this->generate_filter_string();
         $this->api_url         = $config['api_url'];
     }
 
@@ -151,7 +151,7 @@ class PluginNotice
      *
      * @return void
      */
-    public function boot(): void
+    public function boot()
     {
         // Initialize core notices
         Notice::init();
@@ -190,15 +190,21 @@ class PluginNotice
      *
      * @return string
      */
-    protected function generate_filter_string(): string
+    protected function generate_filter_string()
     {
         $plugins = $this->base_plugins;
 
-        if ($this->pro_class && ( class_exists($this->pro_class) || function_exists($this->pro_class) ) && $this->pro_plugin_slug) {
+        if (
+            $this->pro_class &&
+            (class_exists($this->pro_class) || function_exists($this->pro_class)) &&
+            $this->pro_plugin_slug
+        ) {
             $plugins[] = $this->pro_plugin_slug;
 
             // Remove potential 'free-only' entry if pro is active
-            $plugins = array_filter($plugins, fn($plugin) => $plugin !== $this->plugin_slug . '-free-only');
+            $plugins = array_filter($plugins, function ($plugin) {
+                return $plugin !== $this->plugin_slug . '-free-only';
+            });
         }
 
         return implode(',', $plugins);

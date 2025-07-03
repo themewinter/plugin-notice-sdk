@@ -16,112 +16,112 @@ class Notice
      *
      * @var string
      */
-    protected string $version = '1.0.0'; // default fallback
+    protected $version = '1.0.0'; // default fallback
 
     /**
      * Unique identifier for the notice.
      *
      * @var string
      */
-    protected string $notice_id;
+    protected $notice_id;
 
     /**
      * Text domain of the plugin.
      *
      * @var string
      */
-    protected string $text_domain;
+    protected $text_domain;
 
     /**
      * Unique ID used internally.
      *
      * @var string
      */
-    protected string $unique_id;
+    protected $unique_id;
 
     /**
      * Additional CSS classes for the notice container.
      *
      * @var string
      */
-    protected string $class = '';
+    protected $class = '';
 
     /**
      * Default button configuration.
      *
      * @var array
      */
-    protected array $button;
+    protected $button;
 
     /**
      * Size-specific settings (currently unused).
      *
      * @var array
      */
-    protected array $size = [];
+    protected $size = [];
 
     /**
      * List of buttons added to the notice.
      *
      * @var array
      */
-    protected array $buttons = [];
+    protected $buttons = [];
 
     /**
      * Title of the notice.
      *
      * @var string
      */
-    protected string $title = '';
+    protected $title = '';
 
     /**
      * Message body of the notice.
      *
      * @var string
      */
-    protected string $message = '';
+    protected $message = '';
 
     /**
      * URL of the left-side logo image.
      *
      * @var string
      */
-    protected string $logo = '';
+    protected $logo = '';
 
     /**
      * Whether the notice container should have gutter (padding).
      *
      * @var string
      */
-    protected string $gutter = '';
+    protected $gutter = '';
 
     /**
      * Inline style for the logo image.
      *
      * @var string
      */
-    protected string $logo_style = '';
+    protected $logo_style = '';
 
     /**
      * Dismissible type: false, 'user', or 'global'.
      *
      * @var string|bool
      */
-    protected string|bool $dismissible = false;
+    protected $dismissible = false;
 
     /**
      * Expiration time in seconds for the dismissible notice.
      *
      * @var int
      */
-    protected int $expired_time = 1;
+    protected $expired_time = 1;
 
     /**
      * Raw HTML content to override default markup.
      *
      * @var string
      */
-    protected string $html = '';
+    protected $html = '';
 
     /**
      * Get an instance of the Notice class.
@@ -130,13 +130,13 @@ class Notice
      * @param string|null $unique_id
      * @return self|false
      */
-    public static function instance(?string $text_domain = null, ?string $unique_id = null): self|false
+    public static function instance($text_domain = null, $unique_id = null)
     {
         if (!$text_domain) {
             return false;
         }
         self::$instance = new self();
-        return self::$instance->config($text_domain, $unique_id ?? uniqid());
+        return self::$instance->config($text_domain, $unique_id ?: uniqid());
     }
 
     /**
@@ -144,7 +144,7 @@ class Notice
      *
      * @return void
      */
-    public static function init(): void
+    public static function init()
     {
         add_action('wp_ajax_wpmet-notices', [__CLASS__, 'dismiss_ajax_call']);
     }
@@ -156,7 +156,7 @@ class Notice
      * @param string $unique_id
      * @return $this
      */
-    public function config(string $text_domain, string $unique_id): self
+    public function config($text_domain, $unique_id)
     {
         $this->text_domain  = $text_domain;
         $this->unique_id    = $unique_id;
@@ -181,7 +181,7 @@ class Notice
      * @param string $classname
      * @return $this
      */
-    public function set_class(string $classname = ''): self
+    public function set_class($classname = '')
     {
         $this->class .= $classname;
         return $this;
@@ -193,7 +193,7 @@ class Notice
      * @param string $type
      * @return $this
      */
-    public function set_type(string $type = ''): self
+    public function set_type($type = '')
     {
         $this->class .= " notice-$type";
         return $this;
@@ -205,7 +205,7 @@ class Notice
      * @param array $button
      * @return $this
      */
-    public function set_button(array $button = []): self
+    public function set_button($button = [])
     {
         $this->buttons[] = array_merge($this->button, $button);
         return $this;
@@ -217,7 +217,7 @@ class Notice
      * @param string $id
      * @return $this
      */
-    public function set_id(string $id): self
+    public function set_id($id)
     {
         $this->notice_id = $id;
         return $this;
@@ -229,7 +229,7 @@ class Notice
      * @param string $title
      * @return $this
      */
-    public function set_title(string $title = ''): self
+    public function set_title($title = '')
     {
         $this->title .= $title;
         return $this;
@@ -241,7 +241,7 @@ class Notice
      * @param string $message
      * @return $this
      */
-    public function set_message(string $message = ''): self
+    public function set_message($message = '')
     {
         $this->message .= $message;
         return $this;
@@ -253,7 +253,7 @@ class Notice
      * @param bool $gutter
      * @return $this
      */
-    public function set_gutter(bool $gutter = true): self
+    public function set_gutter($gutter = true)
     {
         $this->gutter = $gutter;
         $this->class .= $gutter ? '' : ' no-gutter';
@@ -267,7 +267,7 @@ class Notice
      * @param string $logo_style
      * @return $this
      */
-    public function set_logo(string $logo = '', string $logo_style = ''): self
+    public function set_logo($logo = '', $logo_style = '')
     {
         $this->logo = $logo;
         $this->logo_style = $logo_style;
@@ -280,7 +280,7 @@ class Notice
      * @param string $html
      * @return $this
      */
-    public function set_html(string $html = ''): self
+    public function set_html($html = '')
     {
         $this->html .= $html;
         return $this;
@@ -293,7 +293,7 @@ class Notice
      * @param int $time Expiry time in seconds
      * @return $this
      */
-    public function set_dismiss(string $scope = 'global', int $time = 604800): self
+    public function set_dismiss($scope = 'global', $time = 604800)
     {
         $this->dismissible = $scope;
         $this->expired_time = $time;
@@ -305,7 +305,7 @@ class Notice
      *
      * @return array
      */
-    public function get_data(): array
+    public function get_data()
     {
         return [
             'message' => $this->message,
@@ -321,7 +321,7 @@ class Notice
      *
      * @return void
      */
-    public function call(): void
+    public function call()
     {
         add_action('admin_notices', [$this, 'get_notice']);
     }
@@ -331,16 +331,22 @@ class Notice
      *
      * @return void
      */
-    public function get_notice(): void
+    public function get_notice()
     {
-        $expired = match ($this->dismissible) {
-            'user'   => get_user_meta(get_current_user_id(), $this->notice_id, true),
-            'global' => get_transient($this->notice_id),
-            default  => '',
-        };
+        switch ($this->dismissible) {
+            case 'user':
+                $expired = get_user_meta(get_current_user_id(), $this->notice_id, true);
+                break;
+            case 'global':
+                $expired = get_transient($this->notice_id);
+                break;
+            default:
+                $expired = '';
+                break;
+        }
 
         global $notice_list;
-        $notice_list ??= [];
+        $notice_list = isset($notice_list) ? $notice_list : [];
 
         if (!isset($notice_list[$this->notice_id]) && (false === $expired || empty($expired))) {
             $notice_list[$this->notice_id] = __FILE__;
@@ -353,117 +359,57 @@ class Notice
      *
      * @return void
      */
-    public function generate_html(): void
+    public function generate_html()
     {
         ?>
-            <div 
-                id="<?php 
-                echo esc_attr($this->notice_id);
-                ?>" 
-                class="notice wpmet-notice notice-<?php 
-                echo esc_attr($this->notice_id . ' ' . $this->class);
-                ?> <?php 
-                echo \false === $this->dismissible ? '' : 'is-dismissible';
-                ?>"
+        <div 
+            id="<?php echo esc_attr($this->notice_id); ?>" 
+            class="notice wpmet-notice notice-<?php echo esc_attr($this->notice_id . ' ' . $this->class); ?> <?php echo $this->dismissible === false ? '' : 'is-dismissible'; ?>"
+            expired_time="<?php echo esc_attr($this->expired_time); ?>"
+            dismissible="<?php echo esc_attr($this->dismissible); ?>"
+        >
+            <?php if (!empty($this->logo)) : ?>
+                <img class="notice-logo" style="<?php echo esc_attr($this->logo_style); ?>" src="<?php echo esc_url($this->logo); ?>" />
+            <?php endif; ?>
 
-                expired_time="<?php 
-                echo esc_attr($this->expired_time);
-                ?>"
-                dismissible="<?php 
-                echo esc_attr($this->dismissible);
-                ?>"
-            >
-                <?php 
-                if (!empty($this->logo)) {
-                    ?>
-                    <img class="notice-logo" style="<?php 
-                    echo esc_attr($this->logo_style);
-                    ?>" src="<?php 
-                    echo esc_url($this->logo);
-                    ?>" />
-                <?php 
-                }
-                ?>
+            <div class="notice-right-container <?php echo empty($this->logo) ? 'notice-container-full-width' : ''; ?>">
+                <?php if (empty($this->html)) : ?>
+                    <?php if (!empty($this->title)) : ?>
+                        <div class="notice-main-title notice-vert-space"><?php echo esc_html($this->title); ?></div>
+                    <?php endif; ?>
 
-                <div class="notice-right-container <?php 
-                echo empty($this->logo) ? 'notice-container-full-width' : '';
-                ?>">
+                    <div class="notice-message notice-vert-space">
+                        <?php echo wp_kses_post($this->message); ?>
+                    </div>
 
-                    <?php 
-                if (empty($this->html)) {
-                    ?>
-                        <?php 
-                    echo empty($this->title) ? '' : sprintf('<div class="notice-main-title notice-vert-space">%s</div>', esc_html($this->title));
-                    ?>
-
-                        <div class="notice-message notice-vert-space">
-                        <?php 
-                    echo wp_kses_post( $this->message );
-                    ?>
+                    <?php if (!empty($this->buttons)) : ?>
+                        <div class="button-container notice-vert-space">
+                            <?php foreach ($this->buttons as $button) : ?>
+                                <a id="<?php echo isset($button['id']) ? esc_attr($button['id']) : ''; ?>"
+                                   href="<?php echo esc_url($button['url']); ?>"
+                                   class="wpmet-notice-button <?php echo esc_attr($button['class']); ?>">
+                                    <?php if (!empty($button['icon'])) : ?>
+                                        <i class="notice-icon <?php echo esc_attr($button['icon']); ?>"></i>
+                                    <?php endif; ?>
+                                    <?php echo esc_html($button['text']); ?>
+                                </a>&nbsp;
+                            <?php endforeach; ?>
                         </div>
-
-                        <?php 
-                    if (!empty($this->buttons)) {
-                        ?>
-                            <div class="button-container notice-vert-space">
-                                <?php 
-                        foreach ($this->buttons as $button) {
-                            ?>
-                                    <a id="<?php 
-                            echo !isset($button['id']) ? '' : esc_attr($button['id']);
-                            ?>" href="<?php 
-                            echo esc_url($button['url']);
-                            ?>" class="wpmet-notice-button <?php 
-                            echo esc_attr($button['class']);
-                            ?>">
-                                        <?php 
-                            if (!empty($button['icon'])) {
-                                ?>
-                                            <i class="notice-icon <?php 
-                                echo esc_attr($button['icon']);
-                                ?>"></i>
-                                        <?php 
-                            }
-                            ?>
-                                        <?php 
-                            echo esc_html($button['text']);
-                            ?>
-                                    </a>
-                                    &nbsp;
-                                <?php 
-                        }
-                        ?>
-                            </div>
-                        <?php 
-                    }
-                    ?>
-
-                    <?php 
-                } else {
-                    ?>
-                        <?php 
-                    echo \wp_kses_post( $this->html );
-                    ?>
-                    <?php 
-                }
-                ?>
-
-                </div>
-
-                <?php 
-                if (\false !== $this->dismissible) {
-                    ?>
-                    <button type="button" class="notice-dismiss">
-                        <span class="screen-reader-text">x#test-console-04</span>
-                    </button>
-                <?php 
-                }
-                ?>
-
-                <div style="clear:both"></div>
-
+                    <?php endif; ?>
+                <?php else : ?>
+                    <?php echo wp_kses_post($this->html); ?>
+                <?php endif; ?>
             </div>
-		<?php 
+
+            <?php if ($this->dismissible !== false) : ?>
+                <button type="button" class="notice-dismiss">
+                    <span class="screen-reader-text">x#dismiss</span>
+                </button>
+            <?php endif; ?>
+
+            <div style="clear:both"></div>
+        </div>
+        <?php
     }
 
     /**
@@ -471,16 +417,16 @@ class Notice
      *
      * @return void
      */
-    public static function dismiss_ajax_call(): void
+    public static function dismiss_ajax_call()
     {
-        $nonce = sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''));
+        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
         if (empty($nonce) || !wp_verify_nonce($nonce, 'wpmet-notices')) {
             wp_send_json_error();
         }
 
-        $notice_id   = sanitize_text_field(wp_unslash($_POST['notice_id'] ?? ''));
-        $dismissible = sanitize_text_field(wp_unslash($_POST['dismissible'] ?? ''));
-        $expired     = (int) sanitize_text_field(wp_unslash($_POST['expired_time'] ?? ''));
+        $notice_id   = isset($_POST['notice_id']) ? sanitize_text_field(wp_unslash($_POST['notice_id'])) : '';
+        $dismissible = isset($_POST['dismissible']) ? sanitize_text_field(wp_unslash($_POST['dismissible'])) : '';
+        $expired     = isset($_POST['expired_time']) ? (int) sanitize_text_field(wp_unslash($_POST['expired_time'])) : 0;
 
         if ($notice_id) {
             if ($dismissible === 'user') {
@@ -493,14 +439,14 @@ class Notice
 
         wp_send_json_error();
     }
-    
+
     /**
      * Set the plugin version dynamically.
      *
      * @param string $version
      * @return $this
      */
-    public function set_version(string $version): self
+    public function set_version($version)
     {
         $this->version = $version;
         return $this;
@@ -511,7 +457,7 @@ class Notice
      *
      * @return string
      */
-    public function get_version(): string
+    public function get_version()
     {
         return $this->version;
     }
@@ -521,7 +467,7 @@ class Notice
      *
      * @return string
      */
-    public function get_script_location(): string
+    public function get_script_location()
     {
         return __FILE__;
     }

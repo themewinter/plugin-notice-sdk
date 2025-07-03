@@ -194,7 +194,7 @@ class PluginNotice
     {
         $plugins = $this->base_plugins;
 
-        if ($this->pro_class && class_exists($this->pro_class) && $this->pro_plugin_slug) {
+        if ($this->pro_class && ( class_exists($this->pro_class) || function_exists($this->pro_class) ) && $this->pro_plugin_slug) {
             $plugins[] = $this->pro_plugin_slug;
 
             // Remove potential 'free-only' entry if pro is active

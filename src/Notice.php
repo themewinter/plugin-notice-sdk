@@ -146,7 +146,117 @@ class Notice
      */
     public static function init()
     {
+        static $initialized = false;
+        
+        // Prevent multiple initializations
+        if ( $initialized ) {
+            return;
+        }
+        
         add_action('wp_ajax_wpmet-notices', [__CLASS__, 'dismiss_ajax_call']);
+        add_action( 'admin_head', [ __CLASS__, 'enqueue_scripts' ] );
+        
+        $initialized = true;
+    }
+    
+    /**
+     * Enqueue comparison scripts and styles
+     *
+     * @return void
+     */
+    public static function enqueue_scripts()
+    {
+        ?>
+        <script>
+            jQuery(document).ready(function ($) {
+                $( '.wpmet-notice.is-dismissible' ).on( 'click', '.notice-dismiss', function() {
+                    var _this = $( this ).parents('.wpmet-notice').eq(0);
+                    var notice_id = _this.attr( 'id' ) || '';
+                    var expired_time = _this.attr( 'expired_time' ) || '';
+                    var dismissible = _this.attr( 'dismissible' ) || '';
+                    var nonce = '<?php echo wp_create_nonce( 'wpmet-notices' ); ?>';
+
+                    _this.hide();
+
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'wpmet-notices',
+                            notice_id: notice_id,
+                            dismissible: dismissible,
+                            expired_time: expired_time,
+                            nonce: nonce
+                        },
+                    });
+                });
+            });
+        </script>
+        <style>
+            .wpmet-notice{
+                margin: 5px 15px 15px;
+                padding: 0!important;
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-start;
+                align-items: center;
+            }
+
+            .wpmet-notice .notice-right-container{
+                margin: .7rem .8rem .8rem;
+            }
+
+            .notice-container-full-width{
+                width:100%!important;
+            }
+            
+            .wpmet-notice.no-gutter{
+                padding: 0!important;
+                border-width: 0!important;
+            }
+            .wpmet-notice.no-gutter .notice-right-container{
+                padding: 0!important;
+                margin: 0!important;
+            }
+
+            .notice-right-container .notice-vert-space{
+                margin-bottom: .8rem;
+            }
+
+            .notice-right-container .notice-vert-space:last-child,
+            .notice-right-container .notice-vert-space:only-child{
+                margin-bottom: 0;
+            }
+
+            .wpmet-notice .notice-logo{
+                padding: 3px;
+                max-width: 110px;
+                max-height: 110px;
+            }
+            
+            .wpmet-notice-button {
+                text-decoration:none;
+            }
+            
+            .wpmet-notice-button > i{
+                margin-right: 3px;
+            }
+            
+            .wpmet-notice-button .notice-icon{
+                display:inline-block;
+            }
+
+            .wpmet-notice-button .notice-icon:before{
+                vertical-align: middle!important;
+                margin-top: -1px;
+            }
+
+            .wpmet-notice .notice-main-title{
+                color: #1d2327;
+                font-size: 1.2rem;
+            }
+        </style>
+        <?php
     }
 
     /**

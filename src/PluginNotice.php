@@ -171,15 +171,15 @@ class PluginNotice
             ->call();
 
         // Show rating prompt
-        Rating::instance($this->plugin_slug)
-            ->set_plugin($this->plugin_name, $this->review_url)
-            ->set_allowed_screens($this->allowed_screens)
-            ->set_priority(30)
-            ->set_first_appear_day(7)
-            ->set_condition(true)
-            ->set_api_url($this->api_url)
-            ->set_support_url($this->support_url)
-            ->call();
+        // Rating::instance($this->plugin_slug)
+        //     ->set_plugin($this->plugin_name, $this->review_url)
+        //     ->set_allowed_screens($this->allowed_screens)
+        //     ->set_priority(30)
+        //     ->set_first_appear_day(7)
+        //     ->set_condition(true)
+        //     ->set_api_url($this->api_url)
+        //     ->set_support_url($this->support_url)
+        //     ->call();
     }
 
     /**

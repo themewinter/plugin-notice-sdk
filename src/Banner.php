@@ -33,20 +33,6 @@ class Banner
     protected $data;
 
     /**
-     * Last API check timestamp.
-     *
-     * @var int
-     */
-    protected $last_check = 0;
-
-    /**
-     * Time interval between API checks (default: 6 hours).
-     *
-     * @var int
-     */
-    protected $check_interval = 3600 * 6;
-
-    /**
      * Allowed screen IDs for banners.
      *
      * @var array
@@ -216,30 +202,35 @@ class Banner
     }
 
     /**
-     * Get data from cache or fetch from remote if outdated.
+     * Get data from transient cache or fetch from remote if expired.
      *
      * @return void
      */
     private function get_data()
     {
-        $this->data = get_option($this->text_domain . '__banner_data') ?: [];
-        $this->last_check = get_option($this->text_domain . '__banner_last_check') ?: 0;
+        $cache_key = $this->text_domain . '_banner_data';
+        $cached    = get_transient($cache_key);
 
-        if (($this->last_check + $this->check_interval) < time()) {
-            $response = wp_remote_get(
-                $this->api_url . '/cache/' . $this->text_domain . '.json?nocache=' . time(),
-                ['timeout' => 10, 'httpversion' => '1.1']
-            );
+        if ($cached !== false) {
+            $this->data = $cached;
+            return;
+        }
 
-            if (!is_wp_error($response) && !empty($response['body'])) {
-                $decoded = json_decode($response['body']);
-                if (!empty($decoded)) {
-                    $this->data = $decoded;
-                    update_option($this->text_domain . '__banner_data', $this->data);
-                    update_option($this->text_domain . '__banner_last_check', time());
-                }
+        $response = wp_remote_get(
+            $this->api_url . '/cache/' . $this->text_domain . '.json',
+            ['timeout' => 10, 'httpversion' => '1.1']
+        );
+
+        if (!is_wp_error($response) && !empty($response['body'])) {
+            $decoded = json_decode($response['body']);
+            if (!empty($decoded)) {
+                $this->data = $decoded;
+                set_transient($cache_key, $this->data, 3600 * 8);
+                return;
             }
         }
+
+        $this->data = [];
     }
 
     /**
@@ -281,7 +272,7 @@ class Banner
     }
 
     /**
-     * Enable test mode (set check interval to 1 sec).
+     * Enable test mode — clears the transient to force a fresh fetch.
      *
      * @param bool $is_test
      * @return $this
@@ -289,7 +280,7 @@ class Banner
     public function is_test($is_test = false)
     {
         if ($is_test) {
-            $this->check_interval = 1;
+            delete_transient($this->text_domain . '_banner_data');
         }
 
         return $this;

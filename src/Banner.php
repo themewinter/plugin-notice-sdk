@@ -206,7 +206,7 @@ class Banner
     private function render_banner($content, $instance, $inline_css)
     {
         $html = sprintf(
-            '<a target="_blank"%s class="plugin-notice-href" href="%s"><img style="display: block;margin: 0 auto;" src="%s" /></a>',
+            '<a target="_blank"%s class="plugin-notice-href" href="%s"><img style="display: block;margin: 0 auto; max-width:100%;" src="%s" /></a>',
             $inline_css,
             esc_url($content->data->banner_link),
             esc_url($content->data->banner_image)

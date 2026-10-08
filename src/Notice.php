@@ -169,6 +169,64 @@ class Notice
         ?>
         <script>
             jQuery(document).ready(function ($) {
+                /* Show each banner-server popup when it is time:
+                   data-nb-delay  = wait this many seconds,
+                   data-nb-scroll = wait until this % of the page is scrolled.
+                   When both are set, wait for both. When neither is set,
+                   show right away. The animation comes from the CSS. */
+                $( '.wpmet-notice [data-nb-popup]' ).each(function () {
+                    var box      = this;
+                    var delay    = parseInt(box.getAttribute('data-nb-delay'), 10) || 0;
+                    var scroll   = parseInt(box.getAttribute('data-nb-scroll'), 10) || 0;
+                    var timeOk   = delay <= 0;
+                    var scrollOk = scroll <= 0;
+
+                    function tryShow() {
+                        if (timeOk && scrollOk) {
+                            box.classList.add('nb-show');
+                        }
+                    }
+
+                    function scrolledPercent() {
+                        var room = document.documentElement.scrollHeight - window.innerHeight;
+                        /* A page too short to scroll counts as fully scrolled. */
+                        return room <= 0 ? 100 : (window.scrollY / room) * 100;
+                    }
+
+                    function onScroll() {
+                        if (scrolledPercent() >= scroll) {
+                            scrollOk = true;
+                            window.removeEventListener('scroll', onScroll);
+                            tryShow();
+                        }
+                    }
+
+                    if (!timeOk) {
+                        setTimeout(function () { timeOk = true; tryShow(); }, delay * 1000);
+                    }
+
+                    if (!scrollOk) {
+                        window.addEventListener('scroll', onScroll, { passive: true });
+                    }
+
+                    /* Wait one frame, so the browser draws the hidden state
+                       first and the fade-in really plays. */
+                    requestAnimationFrame(function () {
+                        if (!scrollOk) { onScroll(); }
+                        tryShow();
+                    });
+                });
+
+                /* The close mark inside a server banner is a span (the server's
+                   HTML filter deletes buttons and tabindex). Make it work with
+                   the keyboard too. */
+                $( '.wpmet-jhanda-float .notice-dismiss' ).attr( 'tabindex', '0' ).on( 'keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        $( this ).trigger( 'click' );
+                    }
+                });
+
                 $( '.wpmet-notice.is-dismissible' ).on( 'click', '.notice-dismiss', function() {
                     var _this = $( this ).parents('.wpmet-notice').eq(0);
                     var notice_id = _this.attr( 'id' ) || '';
@@ -213,6 +271,38 @@ class Notice
             .wpmet-notice-button .notice-icon:before { vertical-align: middle !important; margin-top: -1px; }
 
             .wpmet-notice .notice-main-title { color: #1d2327; font-size: 1.2rem; }
+
+            /* Banner from the banner server (a style like card, toast, top
+               bar). Popups are position:fixed, so hide the empty notice box
+               around the banner, and its extra close button. */
+            .wpmet-notice.wpmet-jhanda-float {
+                background: transparent !important;
+                border: 0 !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                display: block !important;
+            }
+            .wpmet-notice.wpmet-jhanda-float > .notice-dismiss { display: none !important; }
+            .wpmet-notice.wpmet-jhanda-float > div[style*="clear"] { display: none !important; }
+            /* The close mark inside the banner draws its own cross. Turn off
+               the WordPress core icon, position and padding. */
+            .wpmet-jhanda-float .notice-dismiss:before { content: none !important; }
+            .wpmet-jhanda-float .notice-dismiss { position: static; padding: 0; margin: 0; top: auto; right: auto; }
+            /* Popups start hidden, then fade and rise in. The script above
+               adds nb-show when it is time. */
+            [data-nb-popup] {
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(14px);
+                transition: opacity .45s ease-out, transform .45s ease-out, visibility 0s linear .45s;
+            }
+            [data-nb-popup].nb-show {
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+                transition: opacity .45s ease-out, transform .45s ease-out, visibility 0s;
+            }
         </style>
         <?php
     }

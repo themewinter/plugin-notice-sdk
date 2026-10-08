@@ -205,6 +205,17 @@ class Banner
      */
     private function render_banner($content, $instance, $inline_css)
     {
+        // New styles: the banner server sends finished HTML. It is printed
+        // through wp_kses_post() by the Notice class. It has its own close
+        // mark, so the notice box around it is hidden by CSS.
+        if (!empty($content->data->html)) {
+            $instance->set_gutter(false)
+                     ->set_class(' wpmet-jhanda-float')
+                     ->set_html($content->data->html)
+                     ->call();
+            return;
+        }
+
         $html = sprintf(
             '<a target="_blank"%s class="plugin-notice-href" href="%s"><img style="display: block;margin: 0 auto; max-width:100%%;" src="%s" /></a>',
             $inline_css,

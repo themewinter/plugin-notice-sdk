@@ -276,18 +276,18 @@ class Notice
                bar). Popups are position:fixed, so hide the empty notice box
                around the banner, and its extra close button. */
             .wpmet-notice.wpmet-jhanda-float {
-                background: transparent !important;
-                border: 0 !important;
-                box-shadow: none !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                display: block !important;
+                background: transparent;
+                border: 0;
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                display: block;
             }
-            .wpmet-notice.wpmet-jhanda-float > .notice-dismiss { display: none !important; }
-            .wpmet-notice.wpmet-jhanda-float > div[style*="clear"] { display: none !important; }
+            .wpmet-notice.wpmet-jhanda-float > .notice-dismiss { display: none; }
+            .wpmet-notice.wpmet-jhanda-float > div[style*="clear"] { display: none; }
             /* The close mark inside the banner draws its own cross. Turn off
                the WordPress core icon, position and padding. */
-            .wpmet-jhanda-float .notice-dismiss:before { content: none !important; }
+            .wpmet-jhanda-float .notice-dismiss:before { content: none; }
             .wpmet-jhanda-float .notice-dismiss { position: static; padding: 0; margin: 0; top: auto; right: auto; }
             /* Popups start hidden, then fade and rise in. The script above
                adds nb-show when it is time. */

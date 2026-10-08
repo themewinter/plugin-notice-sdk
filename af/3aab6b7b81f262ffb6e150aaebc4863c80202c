@@ -1,0 +1,19 @@
+src/Notice.php
+  s_b6d055ed696a63::t_cdcd70705d14c1 279-284,286-287,290
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "af3aab6b7b81f262ffb6e150aaebc4863c80202c",
+  "prompts": {},
+  "sessions": {
+    "s_b6d055ed696a63": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4062ef68-f4e9-43af-ac21-8d4d2fdea66a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
